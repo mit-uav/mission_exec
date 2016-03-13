@@ -11,7 +11,6 @@ static const std::string OPENCV_WINDOW = "Image window";
 
 class MissionExecutive {
 	ros::Publisher correct_dest, kill_switch;
-	ros::Subscriber full_state, destination;
 	image_transport::Subscriber image;
 	cv_bridge::CvImagePtr cv_ptr;
 	bool flying;
@@ -20,9 +19,7 @@ class MissionExecutive {
 	MissionExecutive(ros::NodeHandle& nh) {
 		correct_dest = nh.advertise<geometry_msgs::Twist>("/mituav/true_destination", 1000);
 		kill_switch = nh.advertise<std_msgs::Empty>("/mituav/kill_switch", 1000);
-		full_state = nh.publish<geometry_msgs::Twist>("/mituav/FullState", 1000);
-		destination = nh.publish<std_msgs::Empty>("/mituav/destination", 1000);
-		
+
 		flying = true;
 	};
 
@@ -44,9 +41,7 @@ class MissionExecutive {
 		cy_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
 	}
 
-	void update_env() {
-		
-	}
+	void update_state(const std_msgs::Empty& msg) { return }
 
 };
 
@@ -56,16 +51,15 @@ int main (int argc, char ** argv) {
 	ros::init(argc, argv, "mission_executive");
 
 	ros::NodeHandle nh;
+	ros::Subscriber full_state, destination;
 
 	MissionExecutive me(nh);
 
 	cv::namedWindow("view");
 	cv::startWindowThread();
 
-	ros::Subscriber recieved_command = nh.subscribe("executive/cmd_vel", 1000, &MissionExecutive::check_commands, &me);
-	ros::Subscriber emergency_stop = nh.subscribe("executive/stop", 1000, &MissionExecutive::stop, &me);
-	//ros::Subscriber front_camera = nh.subscribe("ardrone/front/image_raw", 1, &MissionExecutive::get_image, &me);
-	ImageTransport::Subscriber usb_cam = nh.subscribe("usb_cam/image_raw", 1, &MissionExecutive::get_image, &me);
+	full_state = nh.subscribe("/mituav/FullState", 1000, &MissionExecutive::update_state, &me);
+	destination = nh.subscribe("/mituav/destination", 1000, &MissionExecutive::check_commands, &me);
 
 	ros::Rate loop_rate(200);
 
