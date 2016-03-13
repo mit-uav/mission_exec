@@ -4,7 +4,9 @@ project(mission_executive)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp geometry_msgs std_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp geometry_msgs std_msgs image_transport)
+
+find_package(OpenCV)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -108,7 +110,7 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 ## Declare a C++ library
 # add_library(mission_executive
@@ -130,6 +132,7 @@ add_executable(mission_executive_node src/mission_executive_node.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(mission_executive_node
   ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
 )
 
 #############
